@@ -1,64 +1,21 @@
-﻿from PIL import Image
-from sympy import symbols, diff, lambdify
-from math import prod
-from sklearn.cluster import KMeans
-import numpy as np
+﻿import numpy as np
 import pandas as pd
 import scipy.optimize as sopt
-
-
-class DataFields:
-    screen_x = 'Screen X'
-    screen_y = 'Screen Y'
-    root_virtual_x = 'Root Virtual X'
-    root_virtual_y = 'Root Virtual Y'
-    converged = 'Converged'
-    label = 'Label'
-    color = 'Color'
-
-
-class ImageTile:
-    image_x_max = 256
-    image_y_max = 256
-    image_size = (image_x_max, image_y_max)
-
-    vx0, vy0 = image_x_max / 2., image_y_max / 2.
-    zoom = min(image_x_max, image_y_max) / 10. # basic value
-
-    def __init__(self, x: int, y: int, zoom: float):
-        self.eye_vx = x # change to converting tile coords to virtual coords
-        self.eye_vy = y
-        self.zoom *= zoom # basic zoom multiplied by eye_zoom
-
-    def virtual_to_screen(self, vx: float, vy: float) -> (int, int):
-        sx = int(round(self.vx0 - (self.eye_vx - vx) * self.zoom))
-        sy = int(round(self.vy0 - (vy - self.eye_vy) * self.zoom))
-        return sx, sy
-
-    def screen_to_virtual(self, sx: int, sy: int) -> (float, float):
-        vx = (sx - self.vx0) / self.zoom + self.eye_vx
-        vy = (self.vy0 - sy) / self.zoom + self.eye_vy
-        return vx, vy
-
-    def get_screen_points(self):
-        x_range = range(self.image_size[0])
-        y_range = range(self.image_size[1])
-        image_screen_points_generator = ((sx, sy) for sx in x_range for sy in y_range)
-        return np.array(image_screen_points_generator)
-
-    def get_virtual_points(self):
-        sps = self.get_screen_points()
-        spsx, spsy = sps[:, 0], sps[:, 1]
-        # noinspection PyTypeChecker
-        vpsx, vpsy = self.screen_to_virtual(spsx, spsy)
-        return np.transpose(np.concatenate((vpsx, vpsy), axis=0))
+from PIL import Image
+from sympy import symbols, diff, lambdify
+from math import prod
+from colorsys import hsv_to_rgb
+from sklearn.cluster import KMeans
+from application.utils.pandas_helper import PandasHelper
+from application.constants import DataFields
+from application.image_tile import ImageTile
 
 
 class BasinsDrawerService:
     target_roots = [
-        1.2 - 4*1j,
-        3 + 2.4*1j,
-        -1.2 - 1.4*1j
+        complex(1.2, -4),
+        complex(3, 2.4),
+        complex(-1.2, - 1.4),
     ]
     max_iterations = 100
 
@@ -70,15 +27,13 @@ class BasinsDrawerService:
         2: (70, saturation_value, value),
     }
 
-    def draw(self, x, y, zoom = 1) -> Image:
+    def draw(self, x, y, zoom=1) -> Image:
         tile = ImageTile(x, y, zoom)
 
         f, df = self.create_function()
         approximate_roots = self.get_roots_out_of_screen_points(f, df, tile.get_virtual_points())
-        approximate_roots = self.clusterize_approximate_roots(approximate_roots)
 
-        image = Image.new("RGBA", tile.image_size, color='black')
-        return image
+        return self.create_image(approximate_roots, tile)
 
     def create_function(self):
         variable = symbols('z')
@@ -91,8 +46,6 @@ class BasinsDrawerService:
         vps = starting_points[:, 0] + starting_points[:, 1] * 1j
         res = sopt.newton(f, fprime=df, x0=vps, maxiter=self.max_iterations, full_output=True)
         return pd.DataFrame.from_dict({
-            DataFields.screen_x: spsx,
-            DataFields.screen_y: spsy,
             DataFields.root_virtual_x: np.vectorize(lambda z: z.real)(res.root),
             DataFields.root_virtual_y: np.vectorize(lambda z: z.imag)(res.root),
             DataFields.converged: res.converged,
@@ -100,9 +53,44 @@ class BasinsDrawerService:
 
     def clusterize_approximate_roots(self, approximate_roots: pd.DataFrame):
         model = KMeans(n_clusters=len(self.target_roots), n_init=8, random_state=42)
-        clusters = model.fit_predict(approximate_roots[[DataFields.root_virtual_x, DataFields.root_virtual_y]].values)
-        return pd.concat([approximate_roots, pd.DataFrame(clusters, columns=[DataFields.label])], axis=1)
+        return model.fit_predict(approximate_roots[[DataFields.root_virtual_x, DataFields.root_virtual_y]].values)
 
-    def create_image(self, approximate_roots: pd.DataFrame, ):
+    def create_image(self, approximate_roots: pd.DataFrame, tile: ImageTile):
+        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, tile.get_screen_points(), [DataFields.screen_x, DataFields.screen_y])
 
+        labels = self.clusterize_approximate_roots(approximate_roots)
+        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, labels, [DataFields.label])
 
+        colors_by_rows = np.column_stack(np.vectorize(self.get_color_by_cluster_and_iterations)(labels))
+        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, colors_by_rows, [DataFields.color_r, DataFields.color_g, DataFields.color_b, DataFields.color_a])
+
+        image = Image.new("RGBA", tile.image_size, color='black')
+        pixels = image.load()
+
+        for row in approximate_roots.itertuples():
+            # sx = row[datafields.screen_x]
+            # sy = row[datafields.screen_y]
+            # color = row[datafields.color_r], row[datafields.color_g], row[datafields.color_b], row[datafields.color_a]
+            sx = row[4]
+            sy = row[5]
+            color = row[7], row[8], row[9], row[10]
+            pixels[sx, sy] = color
+
+        for root in self.target_roots:
+            vx, vy = root.real, root.imag
+            sx, sy = tile.virtual_to_screen(vx, vy)
+            print(vx, vy, sx, sy)
+            if tile.is_in_image(sx, sy):
+                pixels[sx, sy] = (255, 255, 255, 255)
+
+        svx0, svy0 = tile.virtual_to_screen(0, 0)
+        if tile.is_in_image(svx0, svy0):
+            pixels[svx0, svy0] = (0, 0, 0, 255)
+
+        return image
+
+    def get_color_by_cluster_and_iterations(self, label: int) -> (int, int, int):
+        hue, saturation, value = self.color_by_labels[label]
+        hue, saturation, value = hue / 100., saturation / 100., value / 100.
+        r, g, b = hsv_to_rgb(hue, saturation, value)
+        return int(r * 255), int(g * 255), int(b * 255), 255

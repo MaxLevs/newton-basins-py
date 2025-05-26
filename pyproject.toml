@@ -11,4 +11,5 @@ dependencies = [
     "scikit-learn>=1.6.1",
     "scipy>=1.15.3",
     "sympy>=1.14.0",
+    "tk==0.1.0",
 ]
