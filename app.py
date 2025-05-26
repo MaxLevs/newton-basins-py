@@ -1,9 +1,9 @@
-﻿import tkinter as tk
+﻿import multiprocessing
+import tkinter as tk
 
 from PIL import ImageTk
 
 from application.basins_drawer_service import BasinsDrawerService
-from domain.image_tile import ImageTile
 
 
 class MainApplication(tk.Frame):
@@ -20,10 +20,18 @@ class MainApplication(tk.Frame):
 
 
     def draw(self):
+        points = ((x, y) for x in range(12) for y in range(10))
+        for point in points:
+            self.draw_single(point)
+
+    def draw_single(self, point):
+        x, y = point
         image = self.drawer.draw(0, 0, 1)
         tk_image = ImageTk.PhotoImage(image, master=self)
-        self.canvas.create_image(image.size[0] / 2, image.size[1] / 2, image=tk_image)
+        self.canvas.create_image(image.size[0] * x, image.size[1] * y, image=tk_image)
         self.tk_images.append(tk_image)
+        print(x, y, tk_image)
+        return 1
 
 
 if __name__ == "__main__":

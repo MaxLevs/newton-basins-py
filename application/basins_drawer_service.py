@@ -1,12 +1,8 @@
 ﻿from colorsys import hsv_to_rgb
-from PIL import Image
 
 import numpy as np
-import pandas as pd
-import scipy.optimize as sopt
+from PIL import Image
 
-from application.constants import DataFields
-from application.utils.pandas_helper import PandasHelper
 from domain.image_tile import ImageTile
 from domain.math_equation import MathEquation
 

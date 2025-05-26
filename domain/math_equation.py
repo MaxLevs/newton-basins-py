@@ -1,11 +1,9 @@
-﻿import numpy as np
-import pandas as pd
+﻿from math import prod
+
+import numpy as np
 import scipy.optimize as sopt
+from sympy import symbols, diff, lambdify
 
-from math import prod
-from sympy import symbols, diff, lambdify, Eq
-
-from application.constants import DataFields
 
 class MathEquation:
     def __init__(self, roots: list[complex]):
