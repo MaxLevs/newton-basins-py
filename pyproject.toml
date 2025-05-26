@@ -1,0 +1,14 @@
+[project]
+name = "newtonbasins"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "notebook>=7.4.2",
+    "numpy>=2.2.6",
+    "pandas>=2.2.3",
+    "pillow>=11.2.1",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.15.3",
+    "sympy>=1.14.0",
+]
