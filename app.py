@@ -11,7 +11,7 @@ class MainApplication(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         tk.Button(self, text='Calculate', command=self.draw).pack(side="top")
-        self.canvas = tk.Canvas(self, width=512, height=512)
+        self.canvas = tk.Canvas(self, width=parent.winfo_width(), height=parent.winfo_width())
         self.canvas.pack(side="top", fill="both", expand=True)
 
         self.roots = [complex(1.2, -4), complex(3, 2.4), complex(-1.2, - 1.4),]
