@@ -1,5 +1,6 @@
 ﻿import numpy as np
 
+
 class ImageTile:
     image_x_max = 256
     image_y_max = 256

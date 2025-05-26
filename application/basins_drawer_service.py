@@ -1,14 +1,16 @@
-﻿import numpy as np
+﻿from colorsys import hsv_to_rgb
+from math import prod
+
+import numpy as np
 import pandas as pd
 import scipy.optimize as sopt
 from PIL import Image
-from sympy import symbols, diff, lambdify
-from math import prod
-from colorsys import hsv_to_rgb
 from sklearn.cluster import KMeans
-from application.utils.pandas_helper import PandasHelper
+from sympy import symbols, diff, lambdify
+
 from application.constants import DataFields
 from application.image_tile import ImageTile
+from application.utils.pandas_helper import PandasHelper
 
 
 class BasinsDrawerService:
@@ -56,13 +58,16 @@ class BasinsDrawerService:
         return model.fit_predict(approximate_roots[[DataFields.root_virtual_x, DataFields.root_virtual_y]].values)
 
     def create_image(self, approximate_roots: pd.DataFrame, tile: ImageTile):
-        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, tile.get_screen_points(), [DataFields.screen_x, DataFields.screen_y])
+        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, tile.get_screen_points(),
+                                                             [DataFields.screen_x, DataFields.screen_y])
 
         labels = self.clusterize_approximate_roots(approximate_roots)
         approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, labels, [DataFields.label])
 
         colors_by_rows = np.column_stack(np.vectorize(self.get_color_by_cluster_and_iterations)(labels))
-        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, colors_by_rows, [DataFields.color_r, DataFields.color_g, DataFields.color_b, DataFields.color_a])
+        approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, colors_by_rows,
+                                                             [DataFields.color_r, DataFields.color_g,
+                                                              DataFields.color_b, DataFields.color_a])
 
         image = Image.new("RGBA", tile.image_size, color='black')
         pixels = image.load()

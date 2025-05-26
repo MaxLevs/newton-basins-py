@@ -1,6 +1,9 @@
-﻿from application.basins_drawer_service import BasinsDrawerService
+﻿import tkinter as tk
+
 from PIL import ImageTk
-import tkinter as tk
+
+from application.basins_drawer_service import BasinsDrawerService
+
 
 class MainApplication(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
