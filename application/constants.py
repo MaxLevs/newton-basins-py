@@ -3,6 +3,7 @@
     screen_y = 'Screen Y'
     root_virtual_x = 'Root Virtual X'
     root_virtual_y = 'Root Virtual Y'
+    iterations = 'Iterations'
     converged = 'Converged'
     label = 'Label'
     color_r = 'Color Red'
