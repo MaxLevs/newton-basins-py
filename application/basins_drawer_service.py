@@ -54,8 +54,13 @@ class BasinsDrawerService:
         })
 
     def clusterize_approximate_roots(self, approximate_roots: pd.DataFrame):
-        model = KMeans(n_clusters=len(self.target_roots), n_init=8, random_state=42)
-        return model.fit_predict(approximate_roots[[DataFields.root_virtual_x, DataFields.root_virtual_y]].values)
+        # model = KMeans(n_clusters=len(self.target_roots), n_init=8, random_state=42)
+        # return model.fit_predict(approximate_roots[[DataFields.root_virtual_x, DataFields.root_virtual_y]].values)
+
+        approx_roots = approximate_roots[DataFields.root_virtual_x].values + approximate_roots[DataFields.root_virtual_y].values * 1j
+        true_roots = np.array(self.target_roots)
+        approx_errors = np.absolute(approx_roots.reshape((-1, 1)) - true_roots)
+        return approx_errors.argmin(axis=1).reshape((-1, 1))
 
     def create_image(self, approximate_roots: pd.DataFrame, tile: ImageTile):
         approximate_roots = PandasHelper.append_to_dataframe(approximate_roots, tile.get_screen_points(),
