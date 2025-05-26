@@ -54,10 +54,9 @@ class BasinsDrawerService:
         })
 
     def clusterize_approximate_roots(self, approximate_roots: pd.DataFrame):
-        # model = KMeans(n_clusters=len(self.target_roots), n_init=8, random_state=42)
-        # return model.fit_predict(approximate_roots[[DataFields.root_virtual_x, DataFields.root_virtual_y]].values)
-
-        approx_roots = approximate_roots[DataFields.root_virtual_x].values + approximate_roots[DataFields.root_virtual_y].values * 1j
+        roots_real = approximate_roots[DataFields.root_virtual_x].values
+        roots_imag = approximate_roots[DataFields.root_virtual_y].values
+        approx_roots = roots_real + roots_imag * 1j
         true_roots = np.array(self.target_roots)
         approx_errors = np.absolute(approx_roots.reshape((-1, 1)) - true_roots)
         return approx_errors.argmin(axis=1).reshape((-1, 1))
@@ -78,18 +77,14 @@ class BasinsDrawerService:
         pixels = image.load()
 
         for row in approximate_roots.itertuples():
-            # sx = row[datafields.screen_x]
-            # sy = row[datafields.screen_y]
-            # color = row[datafields.color_r], row[datafields.color_g], row[datafields.color_b], row[datafields.color_a]
             sx = row[4]
             sy = row[5]
-            color = row[7], row[8], row[9], row[10]
+            color = row[7], row[8], row[9], row[10] # r, g, b, a
             pixels[sx, sy] = color
 
         for root in self.target_roots:
             vx, vy = root.real, root.imag
             sx, sy = tile.virtual_to_screen(vx, vy)
-            print(vx, vy, sx, sy)
             if tile.is_in_image(sx, sy):
                 pixels[sx, sy] = (255, 255, 255, 255)
 

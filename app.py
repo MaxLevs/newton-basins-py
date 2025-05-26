@@ -3,6 +3,7 @@
 from PIL import ImageTk
 
 from application.basins_drawer_service import BasinsDrawerService
+from application.image_tile import ImageTile
 
 
 class MainApplication(tk.Frame):
@@ -12,12 +13,13 @@ class MainApplication(tk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry('256x256')
+    image_size = ImageTile.image_size
+    root.geometry(f'{image_size[0]}x{image_size[1]}')
     MainApplication(root).pack(side="top", fill="both", expand=True)
-    canvas = tk.Canvas(root, width=256, height=256)
+    canvas = tk.Canvas(root, width=image_size[0], height=image_size[1])
     drawer = BasinsDrawerService()
     image = drawer.draw(0, 0, 1)
     tk_image = ImageTk.PhotoImage(image, master=root)
-    kk = canvas.create_image(128, 128, image=tk_image)
+    kk = canvas.create_image(image_size[0] / 2, image_size[1] / 2, image=tk_image)
     canvas.pack(side="top", fill="both", expand=True)
     root.mainloop()
