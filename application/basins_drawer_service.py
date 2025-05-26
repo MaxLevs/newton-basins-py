@@ -12,8 +12,6 @@ from domain.math_equation import MathEquation
 
 
 class BasinsDrawerService:
-    target_roots = [
-    ]
     max_iterations = 100
 
     saturation_value = 90
@@ -34,8 +32,7 @@ class BasinsDrawerService:
         return self.create_image(labels, tile)
 
     def get_roots_out_of_screen_points(self, tile: ImageTile):
-        starting_points = tile.get_virtual_points()
-        z0s = starting_points[:, 0] + starting_points[:, 1] * 1j
+        z0s = tile.get_virtual_points_complex()
         return self.math_equation.try_find_root_from(z0s, self.max_iterations)
 
     def create_image(self, labels, tile: ImageTile):
@@ -52,7 +49,7 @@ class BasinsDrawerService:
             color = row[2], row[3], row[4], row[5] # r, g, b, a
             pixels[sx, sy] = color
 
-        for root in self.target_roots:
+        for root in self.math_equation.roots:
             vx, vy = root.real, root.imag
             sx, sy = tile.virtual_to_screen(vx, vy)
             if tile.is_in_image(sx, sy):

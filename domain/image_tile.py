@@ -9,7 +9,7 @@ class ImageTile:
     vx0, vy0 = image_x_max / 2., image_y_max / 2.
     zoom = min(image_x_max, image_y_max) / 10.  # basic value
 
-    def __init__(self, x: int, y: int, zoom: float):
+    def __init__(self, x: float, y: float, zoom: float):
         self.eye_vx = x  # change to converting tile coords to virtual coords
         self.eye_vy = y
         self.zoom *= zoom  # basic zoom multiplied by eye_zoom
