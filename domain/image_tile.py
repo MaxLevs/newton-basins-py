@@ -33,17 +33,17 @@ class ImageTile:
         image_screen_points_generator = [(sx, sy) for sx in x_range for sy in y_range]
         return np.array(image_screen_points_generator)
 
-    def get_virtual_points_separate(self):
+    def get_virtual_points(self):
+        vps_x, vps_y = self.__get_virtual_points_separate()
+        return np.column_stack((vps_x, vps_y))
+
+    def get_virtual_points_complex(self):
+        vps_x, vps_y = self.__get_virtual_points_separate()
+        return (vps_x + vps_y * 1j).reshape((-1, 1))
+
+    def __get_virtual_points_separate(self):
         sps = self.get_screen_points()
         sps_x, sps_y = sps[:, 0], sps[:, 1]
         # noinspection PyTypeChecker
         vps_x, vps_y = self.screen_to_virtual(sps_x, sps_y)
         return vps_x, vps_y
-
-    def get_virtual_points(self):
-        vps_x, vps_y = self.get_virtual_points_separate()
-        return np.column_stack((vps_x, vps_y))
-
-    def get_virtual_points_complex(self):
-        vps_x, vps_y = self.get_virtual_points_separate()
-        return (vps_x + vps_y * 1j).reshape((-1, 1))
