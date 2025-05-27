@@ -6,11 +6,22 @@ from PIL import ImageTk
 from application.basins_drawer_service import BasinsDrawerService
 
 
+class ControlUnit(tk.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
+
+        tk.Button(self, text='Move Left', command=parent.move_left).pack(side="left")
+        tk.Button(self, text='Calculate', command=parent.draw).pack(side="left")
+        tk.Button(self, text='Move Right', command=parent.move_right).pack(side="left")
+
 class MainApplication(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
-        tk.Button(self, text='Calculate', command=self.draw).pack(side="top")
+
+        ControlUnit(self, *args, **kwargs).pack(side="top")
+
         self.canvas = tk.Canvas(self, width=parent.winfo_width(), height=parent.winfo_width())
         self.canvas.pack(side="top", fill="both", expand=True)
 
@@ -20,18 +31,21 @@ class MainApplication(tk.Frame):
 
 
     def draw(self):
-        points = ((x, y) for x in range(12) for y in range(10))
-        for point in points:
-            self.draw_single(point)
-
-    def draw_single(self, point):
-        x, y = point
         image = self.drawer.draw(0, 0, 1)
         tk_image = ImageTk.PhotoImage(image, master=self)
-        self.canvas.create_image(image.size[0] * x, image.size[1] * y, image=tk_image)
-        self.tk_images.append(tk_image)
-        print(x, y, tk_image)
-        return 1
+        element_info = self.canvas.create_image(image.size[0], image.size[1], image=tk_image)
+        self.tk_images.append((tk_image, element_info))
+
+    def move_left(self):
+        for img in self.tk_images:
+            _, canvas_element_info = img
+            # self.canvas.itemconfig(img, state="hidden")
+            self.canvas.move(canvas_element_info, -10, 0)
+
+    def move_right(self):
+        for img in self.tk_images:
+            _, canvas_element_info = img
+            self.canvas.move(canvas_element_info, 10, 0)
 
 
 if __name__ == "__main__":
