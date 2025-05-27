@@ -1,5 +1,5 @@
-﻿import multiprocessing
-import tkinter as tk
+﻿import tkinter as tk
+from typing import List
 
 from PIL import ImageTk
 
@@ -28,28 +28,35 @@ class Space(tk.Frame):
         self.y0 = None
         self.drawer = drawer
 
-        self.tk_images = []
+        self.tk_images : List[ImageTk.PhotoImage] = []
         self.canvas = tk.Canvas(self, width=parent.winfo_width(), height=parent.winfo_width())
         self.canvas.bind('<B1-Motion>', self.drag)
         self.canvas.bind('<B1-ButtonRelease>', self.reset_drag)
+        self.canvas.bind('<MouseWheel>', self.zoom)
         self.canvas.pack(side="top", fill="both", expand=True)
 
 
-    def drag(self, ev) -> object:
+    def zoom(self, event) -> object:
+        x = self.canvas.canvasx(event.x)
+        y = self.canvas.canvasy(event.y)
+        factor = 1.001 ** event.delta
+        self.canvas.scale(tk.ALL, x, y, factor, factor)
+
+    def drag(self, event) -> object:
         dx, dy = 0, 0
         if self.x0 is not None:
-            dx = ev.x - self.x0
+            dx = event.x - self.x0
         if self.y0 is not None:
-            dy = ev.y - self.y0
-        self.x0, self.y0 = ev.x, ev.y
+            dy = event.y - self.y0
+        self.x0, self.y0 = event.x, event.y
         self.move(dx, dy)
 
-    def reset_drag(self, ev) -> object:
+    def reset_drag(self, event) -> object:
         self.x0, self.y0 = None, None
 
     def move(self, x, y):
         # self.canvas.itemconfig(img, state="hidden")
-        self.canvas.move(Space.TILES_TAG, x, y)
+        self.canvas.move(tk.ALL, x, y)
 
     def move_left(self):
         self.move(-10, 0)
@@ -63,7 +70,7 @@ class Space(tk.Frame):
     def draw(self):
         image = self.drawer.draw(0, 0, 1)
         tk_image = ImageTk.PhotoImage(image, master=self)
-        self.canvas.create_image(image.size[0], image.size[1], image=tk_image, tag="basins_tiles")
+        self.canvas.create_image(image.size[0], image.size[1], image=tk_image, tag=Space.TILES_TAG)
         self.tk_images.append(tk_image)
 
 
