@@ -43,16 +43,6 @@ class BasinsDrawerService:
             color = row[2], row[3], row[4], row[5] # r, g, b, a
             pixels[sx, sy] = color
 
-        for root in self.math_equation.roots:
-            vx, vy = root.real, root.imag
-            sx, sy = tile.virtual_to_screen(vx, vy)
-            if tile.is_in_image(sx, sy):
-                pixels[sx, sy] = (255, 255, 255, 255)
-
-        svx0, svy0 = tile.virtual_to_screen(0, 0)
-        if tile.is_in_image(svx0, svy0):
-            pixels[svx0, svy0] = (0, 0, 0, 255)
-
         return image
 
     def __get_color_by_cluster_and_iterations(self, label: int) -> (int, int, int, int):
