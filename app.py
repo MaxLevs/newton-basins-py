@@ -51,7 +51,7 @@ class Space(tk.Frame):
         self.x0, self.y0 = event.x, event.y
         self.move(dx, dy)
 
-    def reset_drag(self, event) -> object:
+    def reset_drag(self, _) -> object:
         self.x0, self.y0 = None, None
 
     def move(self, x, y):
