@@ -36,6 +36,7 @@ class MainApplication(tk.Frame):
 
 if __name__ == "__main__":
     tk_root = tk.Tk()
+    tk_root.title("Newton's basins")
     tk_root.geometry(f'512x512')
     app = MainApplication(tk_root)
     app.pack(side="top", fill="both", expand=True)
