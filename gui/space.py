@@ -4,6 +4,7 @@ from typing import List
 from PIL import ImageTk
 
 from application.basins_drawer_service import BasinsDrawerService
+from domain.image_tile import ImageTile
 
 
 class MovementCalculator:
@@ -32,13 +33,13 @@ class Space(Frame):
         Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
 
-        self.drawer = drawer
         self.movement_calculator = MovementCalculator()
         self.x = 0
         self.y = 0
         self.zoom = 1
+        self.temp_tile = ImageTile(self.x, self.y, self.zoom, drawer)
 
-        self.tiles: List[ImageTk.PhotoImage] = []
+        self.images: List[ImageTk.PhotoImage] = []
         self.canvas = Canvas(self, width=parent.winfo_width(), height=parent.winfo_width())
         self.canvas.bind('<B1-Motion>', self.drag)
         self.canvas.bind('<B1-ButtonRelease>', lambda _: self.movement_calculator.reset())
@@ -69,10 +70,10 @@ class Space(Frame):
         self.move(10, 0)
 
     def clear_elements(self):
-        self.tiles = []
+        self.images = []
 
     def update(self):
-        image = self.drawer.draw(self.x, self.y, self.zoom)
+        image = self.temp_tile.draw()
         image_tk = ImageTk.PhotoImage(image, master=self)
         self.canvas.create_image(self.winfo_width() / 2, self.winfo_height() / 2, image=image_tk, tag=Space.TILES_TAG)
-        self.tiles.append(image_tk)
+        self.images.append(image_tk)

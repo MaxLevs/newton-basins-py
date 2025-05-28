@@ -20,8 +20,7 @@ class BasinsDrawerService:
         self.roots = roots
         self.math_equation = MathEquation(roots)
 
-    def draw(self, x: int, y: int, zoom:int = 1) -> Image:
-        tile = ImageTile(x, y, zoom)
+    def draw(self, tile: ImageTile) -> Image:
         _, _, labels = self.get_roots_out_of_screen_points(tile)
         return self.create_image(labels, tile)
 
