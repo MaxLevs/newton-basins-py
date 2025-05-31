@@ -5,18 +5,15 @@ from application.equation_solver import *
 from domain.image_tile import *
 from domain.math_equation import *
 from domain.root_color import *
-import common.utils as utils
 
 
 class BasinsDrawerService:
     max_iterations = 100
 
-    saturation_value = 90
-    value = 80
     color_by_labels = {
-        0: RootColor(00, saturation_value, value),
-        1: RootColor(40, saturation_value, value),
-        2: RootColor(70, saturation_value, value),
+        0: RootColor(00, 75, 80),
+        1: RootColor(40, 85, 80),
+        2: RootColor(70, 90, 80),
     }
 
     def __init__(self, roots: list[complex]):
