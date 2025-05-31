@@ -21,7 +21,7 @@ class BasinsDrawerService:
     def __init__(self, roots: list[complex]):
         self.roots = roots
         self.math_equation = PolynomialMathEquation(roots)
-        self.equation_solver = EquationSolver()
+        self.equation_solver = EquationSolver(self.max_iterations)
         self.__get_color_by_cluster_and_iterations_vector = np.vectorize(self.__get_color_by_cluster_and_iterations)
 
     @utils.timing
@@ -32,7 +32,7 @@ class BasinsDrawerService:
     @utils.timing
     def get_roots_out_of_screen_points(self, tile: ImageTile):
         z0s = tile.get_virtual_points_complex()
-        _, labels = self.equation_solver.try_find_root_from(self.math_equation, z0s, self.max_iterations)
+        _, labels = self.equation_solver.try_find_root_from(self.math_equation, z0s)
         return labels
 
     @utils.timing

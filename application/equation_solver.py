@@ -6,12 +6,12 @@ from domain.math_equation import MathEquation
 
 # noinspection PyMethodMayBeStatic
 class EquationSolver:
-    def __init__(self):
-        pass
+    def __init__(self, max_iterations: int):
+        self.max_iterations : int = max_iterations
 
     # noinspection PyUnresolvedReferences
-    def try_find_root_from(self, equation: MathEquation, z0, max_iterations: int):
-        res = sopt.newton(equation.f, fprime=equation.df_dx, x0=z0, maxiter=max_iterations, full_output=True)
+    def try_find_root_from(self, equation: MathEquation, z0):
+        res = sopt.newton(equation.f, fprime=equation.df_dx, x0=z0, maxiter=self.max_iterations, full_output=True)
         labels = self.clusterize_approximate_roots(equation, res.root)
         return res.root, labels
 
