@@ -1,6 +1,7 @@
 ﻿from PIL import Image
 
-from application.equation_solver import EquationSolver
+import common.utils as utils
+from application.equation_solver import *
 from domain.image_tile import *
 from domain.math_equation import *
 from domain.root_color import *
