@@ -2,8 +2,6 @@
 from typing import List
 import math
 
-from PIL import ImageTk
-
 from application.basins_drawer_service import BasinsDrawerService
 from domain.image_tile import ImageTile
 from gui.ui_tile import UiTile
