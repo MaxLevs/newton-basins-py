@@ -19,9 +19,10 @@ class BasinsDrawerService:
     def __init__(self, roots: list[complex]):
         self.roots = roots
         self.math_equation = MathEquation(roots)
+        self.__get_color_by_cluster_and_iterations_vector = np.vectorize(self.__get_color_by_cluster_and_iterations)
 
     def draw(self, tile: ImageTile) -> Image:
-        _, _, labels = self.get_roots_out_of_screen_points(tile)
+        _, labels = self.get_roots_out_of_screen_points(tile)
         return self.create_image(labels, tile)
 
     def get_roots_out_of_screen_points(self, tile: ImageTile):
@@ -29,21 +30,12 @@ class BasinsDrawerService:
         return self.math_equation.try_find_root_from(z0s, self.max_iterations)
 
     def create_image(self, labels, tile: ImageTile):
-        screen_points = tile.get_screen_points()
-        colors_by_rows = np.column_stack(np.vectorize(self.__get_color_by_cluster_and_iterations)(labels))
-        points_infos = np.column_stack((screen_points, colors_by_rows))
-
-        image = Image.new("RGBA", tile.image_size, color='black')
-        pixels = image.load()
-
-        for row in points_infos:
-            sx = row[0]
-            sy = row[1]
-            color = row[2], row[3], row[4], row[5] # r, g, b, a
-            pixels[sx, sy] = color
-
+        colors_by_rows = np.column_stack(self.__get_color_by_cluster_and_iterations_vector(labels))
+        colors_by_rows = colors_by_rows.astype(np.uint8).reshape((tile.image_x_max, tile.image_y_max, 3))
+        colors_by_rows = np.moveaxis(colors_by_rows, 1, 0)
+        image = Image.fromarray(colors_by_rows, 'RGB')
         return image
 
-    def __get_color_by_cluster_and_iterations(self, label: int) -> (int, int, int, int):
+    def __get_color_by_cluster_and_iterations(self, label: int) -> (int, int, int):
         color = self.color_by_labels[label]
-        return color.get_rgba()
+        return color.get_rgb()

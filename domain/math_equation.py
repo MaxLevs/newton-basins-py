@@ -20,13 +20,10 @@ class MathEquation:
     def try_find_root_from(self, z0, max_iterations: int):
         # noinspection PyTypeChecker
         res = sopt.newton(self.f, fprime=self.df, x0=z0, maxiter=max_iterations, full_output=True)
-        roots_real = np.vectorize(lambda z: z.real)(res.root)
-        roots_imag = np.vectorize(lambda z: z.imag)(res.root)
-        labels = self.clusterize_approximate_roots(roots_real, roots_imag)
-        return roots_real, roots_imag, labels
+        labels = self.clusterize_approximate_roots(res.root)
+        return res.root, labels
 
-    def clusterize_approximate_roots(self, roots_real, roots_imag):
-        approx_roots = roots_real + roots_imag * 1j
+    def clusterize_approximate_roots(self, approx_roots):
         true_roots = np.array(self.roots)
         approx_errors = np.absolute(approx_roots.reshape((-1, 1)) - true_roots)
         return approx_errors.argmin(axis=1).reshape((-1, 1))
