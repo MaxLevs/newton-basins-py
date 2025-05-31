@@ -30,7 +30,7 @@ class BasinsDrawerService:
     @utils.timing
     def get_roots_out_of_screen_points(self, tile: ImageTile):
         z0s = tile.get_virtual_points_complex()
-        _, labels = self.equation_solver.try_find_root_from(self.math_equation, z0s)
+        _, labels = self.equation_solver.try_find_roots(self.math_equation, z0s)
         return labels
 
     @utils.timing
