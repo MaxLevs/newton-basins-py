@@ -85,8 +85,8 @@ class Space(Frame):
         center_y = screen_y / 2
         coords = [(center_x + fraction_x * ImageTile.image_x_max, center_y + fraction_y * ImageTile.image_y_max) for fraction_x in gen_x for fraction_y in gen_y]
         for x, y in coords:
-            image_tile = ImageTile((x - center_y) / ImageTile.basic_zoom, -(y - center_y) / ImageTile.basic_zoom, 1, self.basins_drawer)
-            self.tiles.append(UiTile(self.canvas, image_tile, (x, y)))
+            image_tile = ImageTile((x - center_y) / ImageTile.basic_zoom, -(y - center_y) / ImageTile.basic_zoom, 1)
+            self.tiles.append(UiTile(self.canvas, self.basins_drawer, image_tile, (x, y)))
 
     def clear_elements(self):
         for tile in self.tiles:
