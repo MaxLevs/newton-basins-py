@@ -1,5 +1,6 @@
 ﻿from PIL import Image
 
+from application.equation_solver import EquationSolver
 from domain.image_tile import *
 from domain.math_equation import *
 from domain.root_color import *
@@ -19,18 +20,20 @@ class BasinsDrawerService:
 
     def __init__(self, roots: list[complex]):
         self.roots = roots
-        self.math_equation = MathEquation(roots)
+        self.math_equation = PolynomialMathEquation(roots)
+        self.equation_solver = EquationSolver()
         self.__get_color_by_cluster_and_iterations_vector = np.vectorize(self.__get_color_by_cluster_and_iterations)
 
     @utils.timing
     def draw(self, tile: ImageTile) -> Image:
-        _, labels = self.get_roots_out_of_screen_points(tile)
+        labels = self.get_roots_out_of_screen_points(tile)
         return self.create_image(labels, tile)
 
     @utils.timing
     def get_roots_out_of_screen_points(self, tile: ImageTile):
         z0s = tile.get_virtual_points_complex()
-        return self.math_equation.try_find_root_from(z0s, self.max_iterations)
+        _, labels = self.equation_solver.try_find_root_from(self.math_equation, z0s, self.max_iterations)
+        return labels
 
     @utils.timing
     def create_image(self, labels, tile: ImageTile):

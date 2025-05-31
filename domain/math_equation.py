@@ -1,41 +1,41 @@
 ﻿from math import prod
 
-import numpy as np
-import scipy.optimize as sopt
-from sympy import symbols, diff, lambdify
+import sympy as sp
 
 
 class MathEquation:
-    def __init__(self, roots: list[complex]):
+    """
+    Basic representation of Math equation.
+    """
+
+    def __init__(self, roots: list[complex], f, df_dx):
         self.roots = roots
         """
         Roots of the polynomial equation.
         """
-
-        self.__variable = symbols('z')
-        self.__func_f = prod(map(lambda root: self.__variable - root, self.roots))
-        self.__func_df = diff(self.__func_f, self.__variable)
-
-        self.f = lambdify(self.__variable, self.__func_f, 'numpy')
+        self.f = f
         """
         A function built out of roots.
         """
-
-        self.df_dx = lambdify(self.__variable, self.__func_df, 'numpy')
+        self.df_dx = df_dx
         """
         The first derivative of the function.
         """
 
-    # noinspection PyUnresolvedReferences
-    def try_find_root_from(self, z0, max_iterations: int):
-        res = sopt.newton(self.f, fprime=self.df_dx, x0=z0, maxiter=max_iterations, full_output=True)
-        labels = self.clusterize_approximate_roots(res.root)
-        return res.root, labels
 
-    def clusterize_approximate_roots(self, approx_roots):
-        true_roots = np.array(self.roots)
-        approx_errors = np.absolute(approx_roots.reshape((-1, 1)) - true_roots)
-        return approx_errors.argmin(axis=1).reshape((-1, 1))
+class PolynomialMathEquation(MathEquation):
+    """
+    Representation of polynomial Math equation.
+    """
+
+    def __init__(self, roots: list[complex]):
+        self.__variable = sp.symbols('z')
+        self.__func_f = prod(map(lambda root: self.__variable - root, roots))
+        self.__func_df = sp.diff(self.__func_f, self.__variable)
+
+        f = sp.lambdify(self.__variable, self.__func_f, 'numpy')
+        df_dx = sp.lambdify(self.__variable, self.__func_df, 'numpy')
+        super().__init__(roots, f, df_dx)
 
     def print_f(self):
         str(self.__func_f)
