@@ -22,18 +22,18 @@ class BasinsDrawerService:
         self.equation_solver = EquationSolver(self.max_iterations)
         self.__get_color_by_cluster_and_iterations_vector = np.vectorize(self.__get_color_by_cluster_and_iterations)
 
-    @utils.timing
+    # @utils.timing
     def draw(self, tile: ImageTile) -> Image:
         labels = self.get_roots_out_of_screen_points(tile)
         return self.create_image(labels, tile)
 
-    @utils.timing
+    # @utils.timing
     def get_roots_out_of_screen_points(self, tile: ImageTile):
         z0s = tile.get_virtual_points_complex()
         _, labels = self.equation_solver.try_find_roots(self.math_equation, z0s)
         return labels
 
-    @utils.timing
+    # @utils.timing
     def create_image(self, labels, tile: ImageTile):
         colors_by_rows = np.column_stack(self.__get_color_by_cluster_and_iterations_vector(labels))
         colors_by_rows = colors_by_rows.astype(np.uint8).reshape((tile.image_x_max, tile.image_y_max, 3))
